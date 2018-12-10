@@ -1,0 +1,101 @@
+			
+			
+		 	--UL to UL
+			
+				select distinct 
+								
+				'unilever' enterprisebid,
+				'unilever' customerbid,
+				'' customer_name,
+				SP2.WERKS as shipfrom_site_id, --ShipFrom mapping
+				OL.LOCATION_NAME as shipfrom_site_name,
+				''shipfrom_address,
+				OL.CITY  as shipfrom_locality_or_city,
+				OL.PROVINCE_CODE  as shipfrom_street_region,
+				OL.POSTAL_CODE   as shipfrom_postal_code,
+				OL.COUNTRY_CODE3_GID as shipfrom_country_code,
+				OS.DEST_LOCATION_GID as shipto_site_id, --ShipTo mapping
+				DL.LOCATION_NAME as shipto_site_name,
+				''shipto_address,
+				DL.CITY as shipto_locality_or_city,
+				DL.PROVINCE_CODE as shipto_state_region,
+				DL.POSTAL_CODE as shipto_postal_code,
+				DL.COUNTRY_CODE3_GID as shipto_country_or_code,
+				OS.SERVPROV_GID as carrier_id,
+				CL.LOCATION_NAME  as carrier_name,
+				case OS.TRANSPORT_MODE_GID 
+				when 'INTRMDL' then 'RAIL'
+				when 'TL' then 'ROAD'
+				when 'PARCEL' then 'ROAD'
+				when 'UL_OCEAN' then 'SEA'
+				when 'AIR' then 'AIR'
+				when 'RAIL' then 'RAIL'
+				when 'LTL' then 'ROAD'
+				when 'LCL' then 'ROAD'
+				when 'OCEAN' then 'SEA'
+				when 'UNKNOWN' then ''
+				end 'primary_mode_of_transport',
+				SR.SHIPMENT_REFNUM_VALUE as carrier_tracking_id,
+				OS.SHIPMENT_GID as master_bill_no,
+				''ocean_bill_no,
+				''house_airway_bill_no,
+				OSR.SHIPMENT_REFNUM_VALUE as bill_of_lading,
+				''booking_no,
+				''container_no,
+				''flight_no,
+				''freight_type,
+				''voyage_id,
+				''vessel_name,
+				''vessel_imo,
+				''origin_gateway,
+				''destination_gateway,
+				''port_of_load,
+				''port_of_discharge,
+				''ready_for_pickup_date,
+				''scheduled_delivery_pol_date,
+				''scheduled_pickup_pol_date,
+				''scheduled_delivery_pod_date,
+				''scheduled_pickup_pod_date,
+				''promised_delivery_date,
+				''header_notes,
+				''purchase_order_id,
+				''sales_order_id,
+				''invoice_number,
+				left(OSD.S_SHIP_UNIT_GID,10) delivery_id, 
+				OS.SHIPMENT_GID as customer_ref_id,
+				OSS.STATUS_CODE_GID as status_code,
+				OSS.INSERT_DATE as status_date_time,
+				SP1.WERKS as status_location,
+				OSS.STATUS_REASON_CODE_GID as reason_code,
+				OSS.EVENTDATE as reason_date_time,
+				''status_lat,
+				''status_long,
+				''line_notes,
+				''snapshot_timestamp,
+				''last_update_timestamp				
+				
+				from SS_STATUS_HISTORY OSH 
+				inner join SHIPMENT_STOP_D  OSD on (OSH.SHIPMENT_GID = OSD.SHIPMENT_GID and OSH.SHIPMENT_STOP_NUM = OSD.STOP_NUM)
+				inner join IE_SHIPMENTSTATUS OSS on OSS.I_TRANSACTION_NO = OSH.I_TRANSACTION_NO
+				inner join SHIPMENT_REFNUM  SR on (OSD.SHIPMENT_GID = SR.SHIPMENT_GID and SR.SHIPMENT_REFNUM_QUAL_GID = 'CN')
+				inner join SHIPMENT_REFNUM  OSR on (OSD.SHIPMENT_GID = OSR.SHIPMENT_GID and OSR.SHIPMENT_REFNUM_QUAL_GID = 'UL_VICS_BOL') 
+			        inner join Shipment OS on OS.SHIPMENT_GID = OSD.SHIPMENT_GID 
+				inner join LOCATION OL on OS.SOURCE_LOCATION_GID = OL.LOCATION_GID  
+				inner join LOCATION DL  on OS.DEST_LOCATION_GID = DL.LOCATION_GID 
+				inner join LOCATION CL  on OS.SERVPROV_GID = CL.LOCATION_GID 
+				inner join TVSWZ SP1 on SP1.VSTEL = OSH.EVENT_LOCATION_GID
+				--inner join TVSWZ SP on OS.DEST_LOCATION_GID = SP.VSTEL
+				inner join TVSWZ SP2 on OS.SOURCE_LOCATION_GID = SP2.VSTEL
+				
+				where --OS.DEST_LOCATION_GID in   ('USS3','US13','US15','US17','CA04','US24','US25','US97','USR8','USR9','USS0','USJ3','USA9','USB1','CA43','USR7','USA0')
+				OS.SOURCE_LOCATION_GID in   ('USS3','US13','US15','US17','CA04','US24','US25','US97','USR8','USR9','USS0','USJ3','USA9','USB1','CA43','USR7','USA0')
+				and OS.INSERT_DATE >='2018.01.01' and  OS.INSERT_DATE <='2018.04.30'
+				 
+				group by OSH.SHIPMENT_GID, OSH.SHIPMENT_STOP_NUM, OSH.I_TRANSACTION_NO, OSD.S_SHIP_UNIT_GID, OSS.STATUS_CODE_GID, 
+						 OSS.INSERT_DATE, OSH.EVENT_LOCATION_GID, OSS.STATUS_REASON_CODE_GID, OSS.EVENTDATE, OSR.SHIPMENT_REFNUM_VALUE, 
+						 SR.SHIPMENT_REFNUM_VALUE, OS.SOURCE_LOCATION_GID, OL.LOCATION_NAME, OL.City, OL.PROVINCE_CODE, 
+						 OL.POSTAL_CODE, OL.COUNTRY_CODE3_GID, DL.LOCATION_NAME, DL.CITY , DL.PROVINCE_CODE, DL.POSTAL_CODE  ,
+						 DL.COUNTRY_CODE3_GID, OS.SERVPROV_GID, CL.LOCATION_NAME , OS.TRANSPORT_MODE_GID, SR.SHIPMENT_REFNUM_VALUE, OS.SHIPMENT_GID, SP1.WERKS, SP2.WERKS, OS.DEST_LOCATION_GID
+								
+			   
+			
