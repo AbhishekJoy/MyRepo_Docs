@@ -1,0 +1,53 @@
+Career Event Data Sets
+=======================
+path: 
+Data Lake Storage Gen1 --> bienodad80092stgadls --> Data explorer --> Unilever --> Business Data Lake -->
+	Elementum  --> Elementum 	==> (Termed as E-ds)
+
+=> E-ds files are in azure	| Path: adl://bienodad80092stgadls.azuredatalakestore.net/Unilever/BusinessDataLake/Elementum/Elementum/*.csv
+=> TVSWZ source is SAP		| Pathe: ???
+--------------------------------------------------------------------------------------------------------------------------------------
+
+Data Files
+==========
+	from SS_STATUS_HISTORY 		OSH 
+E-ds	inner join SHIPMENT_STOP_D  	OSD 	on (OSH.SHIPMENT_GID = OSD.SHIPMENT_GID and OSH.SHIPMENT_STOP_NUM = OSD.STOP_NUM)
+E-ds	inner join IE_SHIPMENTSTATUS 	OSS 	on OSS.I_TRANSACTION_NO = OSH.I_TRANSACTION_NO
+E-ds	inner join SHIPMENT_REFNUM  	SR  	on (OSD.SHIPMENT_GID = SR.SHIPMENT_GID and SR.SHIPMENT_REFNUM_QUAL_GID = 'CN')
+E-ds	inner join SHIPMENT_REFNUM  	OSR 	on (OSD.SHIPMENT_GID = OSR.SHIPMENT_GID and OSR.SHIPMENT_REFNUM_QUAL_GID = 'UL_VICS_BOL') 
+E-ds F	inner join Shipment 		OS  	on OS.SHIPMENT_GID = OSD.SHIPMENT_GID 
+E-ds	inner join LOCATION 		OL  	on OS.SOURCE_LOCATION_GID = OL.LOCATION_GID  
+E-ds	inner join LOCATION 		DL  	on OS.DEST_LOCATION_GID = DL.LOCATION_GID 
+E-ds	inner join LOCATION 		CL  	on OS.SERVPROV_GID = CL.LOCATION_GID 
+	inner join TVSWZ 		SP1 	on SP1.VSTEL = OSH.EVENT_LOCATION_GID
+	inner join TVSWZ 		SP  	on OS.DEST_LOCATION_GID = SP.VSTEL
+	inner join TVSWZ 		SP2 	on OS.SOURCE_LOCATION_GID = SP2.VSTEL
+------------------------------------------------------------------------------------------------------------------------------------
+OS - Shipment fields
+--------------------
+OS.SERVPROV_GID as carrier_id,
+case OS.TRANSPORT_MODE_GID 
+				when 'INTRMDL' then 'RAIL'
+				when 'TL' then 'ROAD'
+				when 'PARCEL' then 'ROAD'
+				when 'UL_OCEAN' then 'SEA'
+				when 'AIR' then 'AIR'
+				when 'RAIL' then 'RAIL'
+				when 'LTL' then 'ROAD'
+				when 'LCL' then 'ROAD'
+				when 'OCEAN' then 'SEA'
+				when 'UNKNOWN' then ''
+				end 'primary_mode_of_transport',
+OS.SHIPMENT_GID as master_bill_no,
+OS.SHIPMENT_GID as customer_ref_id,
+
+
+OS.SOURCE_LOCATION_GID
+OS.DEST_LOCATION_GID
+OS.SERVPROV_GID
+OS.INSERT_DATE >='2018.01.01' and  OS.INSERT_DATE <='2018.04.30'
+OS.TRANSPORT_MODE_GID
+
+
+
+
